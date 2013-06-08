@@ -1,0 +1,750 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+ <!-- Abstract Representation of the Refactorings -->
+	<extension
+		point="org.eclipse.ui.commands">
+		
+		<category
+			id="tinyos.dlrc.refactoring"
+			name="Refactoring">
+		</category>
+	
+		<command
+			id="tinyos.dlrc.refactoring.rename.local.variable"
+			categoryId="tinyos.dlrc.refactoring"
+			name="Rename Local Variable"/>
+			
+		<command
+			id="tinyos.dlrc.refactoring.rename.local.functionparameter"
+			categoryId="tinyos.dlrc.refactoring"
+			name="Rename Function Parameter"/>
+
+		<command
+			id="tinyos.dlrc.refactoring.rename.global.variable"
+			categoryId="tinyos.dlrc.refactoring"
+			name="Rename Global Variable"/>
+			
+		<command
+			id="tinyos.dlrc.refactoring.rename.implementation.variable"
+			categoryId="tinyos.dlrc.refactoring"
+			name="Rename Implementation Local Variable"/>
+			
+		<command
+			id="tinyos.dlrc.refactoring.rename.global.function"
+			categoryId="tinyos.dlrc.refactoring"
+			name="Rename Global Function"/>
+			
+		<command
+			id="tinyos.dlrc.refactoring.rename.local.function"
+			categoryId="tinyos.dlrc.refactoring"
+			name="Rename Local Function"/>
+			
+		<command
+			id="tinyos.dlrc.refactoring.rename.global.interfaces"
+			categoryId="tinyos.dlrc.refactoring"
+			name="Rename Interface"/>
+			
+		<command
+			id="tinyos.dlrc.refactoring.rename.component"
+			categoryId="tinyos.dlrc.refactoring"
+			name="Rename Component"/>
+			
+		<command
+			id="tinyos.dlrc.refactoring.rename.alias.component"
+			categoryId="tinyos.dlrc.refactoring"
+			name="Rename Component Alias"/>
+			
+		<command
+			id="tinyos.dlrc.refactoring.rename.alias.interfaces"
+			categoryId="tinyos.dlrc.refactoring"
+			name="Rename Interface Alias"/>
+			
+		<command
+			id="tinyos.dlrc.refactoring.rename.nesc.function"
+			categoryId="tinyos.dlrc.refactoring"
+			name="Rename NesC Function"/>
+			
+		<command
+			id="tinyos.dlrc.refactoring.extractFunction"
+			categoryId="tinyos.dlrc.refactoring"
+			name="Extract Function"/>
+			
+		<command
+			id="tinyos.dlrc.refactoring.entities.component.alias.introduce"
+			categoryId="tinyos.dlrc.refactoring"
+			name="Introduce Component Alias"/>
+			
+		<command
+			id="tinyos.dlrc.refactoring.entities.interfaces.alias.introduce"
+			categoryId="tinyos.dlrc.refactoring"
+			name="Introduce Interface Alias"/>
+		
+		<!-- Dummy Menu entry, for the case when there is no refactoring available-->	
+		<command
+			id="tinyos.dlrc.refactoring.NoRefactoringAvailable"
+			categoryId="tinyos.dlrc.refactoring"
+			name="No Refactorings Available"/>
+			
+		<command
+			id="tinyos.dlrc.refactoring.NotSaved"
+			categoryId="tinyos.dlrc.refactoring"
+			name="Not all Editors are saved"/>
+			
+		<command
+			id="tinyos.dlrc.refactoring.PluginNotReady"
+			categoryId="tinyos.dlrc.refactoring"
+			name="Plugin not ready"/>
+	</extension>
+ 
+	<!-- The Real Implementations of the Refactorings -->
+	<extension point="org.eclipse.ui.handlers">
+		<handler
+        	class="tinyos.dlrc.refactoring.entities.variable.rename.local.RenameLocalVariableActionHandler"
+        	commandId="tinyos.dlrc.refactoring.rename.local.variable">
+     	</handler>
+     	
+     	<handler
+        	class="tinyos.dlrc.refactoring.entities.functionparameter.rename.ActionHandler"
+        	commandId="tinyos.dlrc.refactoring.rename.local.functionparameter">
+     	</handler>
+     
+     	<handler
+        	class="tinyos.dlrc.refactoring.entities.field.rename.global.ActionHandler"
+        	commandId="tinyos.dlrc.refactoring.rename.global.variable">
+		</handler>
+		
+		
+		<handler
+        	class="tinyos.dlrc.refactoring.entities.variable.rename.implementation.ActionHandler"
+        	commandId="tinyos.dlrc.refactoring.rename.implementation.variable">
+		</handler>
+		
+		<handler
+        	class="tinyos.dlrc.refactoring.entities.field.rename.global.ActionHandler"
+        	commandId="tinyos.dlrc.refactoring.rename.global.function">
+		</handler>
+		
+		<handler
+        	class="tinyos.dlrc.refactoring.entities.function.rename.local.ActionHandler"
+        	commandId="tinyos.dlrc.refactoring.rename.local.function">
+		</handler>
+		
+		<handler
+        	class="tinyos.dlrc.refactoring.entities.interfaces.rename.ActionHandler"
+        	commandId="tinyos.dlrc.refactoring.rename.global.interfaces">
+		</handler>
+		
+		<handler
+        	class="tinyos.dlrc.refactoring.entities.component.rename.ActionHandler"
+        	commandId="tinyos.dlrc.refactoring.rename.component">
+		</handler>
+
+		<handler
+        	class="tinyos.dlrc.refactoring.entities.component.alias.rename.ActionHandler"
+        	commandId="tinyos.dlrc.refactoring.rename.alias.component">
+		</handler>
+		
+		<handler
+        	class="tinyos.dlrc.refactoring.entities.interfaces.alias.rename.ActionHandler"
+        	commandId="tinyos.dlrc.refactoring.rename.alias.interfaces">
+		</handler>
+		
+		<handler
+        	class="tinyos.dlrc.refactoring.entities.function.rename.nesc.ActionHandler"
+        	commandId="tinyos.dlrc.refactoring.rename.nesc.function">
+		</handler>
+		
+		<handler
+        	class="tinyos.dlrc.refactoring.entities.function.extract.ActionHandler"
+        	commandId="tinyos.dlrc.refactoring.extractFunction">
+		</handler>
+		
+		<handler
+        	class="tinyos.dlrc.refactoring.entities.component.alias.introduce.ActionHandler"
+        	commandId="tinyos.dlrc.refactoring.entities.component.alias.introduce">
+		</handler>
+		
+		<handler
+        	class="tinyos.dlrc.refactoring.entities.interfaces.alias.introduce.ActionHandler"
+        	commandId="tinyos.dlrc.refactoring.entities.interfaces.alias.introduce">
+		</handler>
+		
+		<handler
+        	class="tinyos.dlrc.refactoring.entities.none.notavailable.ActionHandler"
+        	commandId="tinyos.dlrc.refactoring.NoRefactoringAvailable">
+        	<enabledWhen>
+        		<not>
+        			<iterate ifEmpty="true">
+        				<test property="tinyos.dlrc.refactoring.isAvailable.NoRefactoringAvailable" />
+        			</iterate>
+        		</not>
+        	</enabledWhen>
+		</handler>		
+		
+		<handler
+        	class="tinyos.dlrc.refactoring.entities.none.notSaved.SaveAllActionHandler"
+        	commandId="tinyos.dlrc.refactoring.NotSaved" />	
+		
+		<handler
+        	class="tinyos.dlrc.refactoring.entities.none.notavailable.ActionHandler"
+        	commandId="tinyos.dlrc.refactoring.PluginNotReady">
+        	<enabledWhen>
+        		<not>
+        			<iterate ifEmpty="true">
+        				<test property="tinyos.dlrc.refactoring.isAvailable.PluginNotReady" />
+        			</iterate>
+        		</not>
+        	</enabledWhen>
+		</handler>
+		
+	</extension>
+
+	<!-- Shortcuts for the Refaactorings (Optional) -->
+	<extension
+		point="org.eclipse.ui.bindings">
+		<!--
+           		One could also add a Shortcut, by adding the following Attribute
+           		to the <key>-Tag,
+           		for example: sequence="M1+M2+9"
+           		 
+           		The M Keys in the sequence are Platform independent keys.
+				On PCs they are mapped to:
+                M1 = Ctrl
+                M2 = Shift
+                M3 = Alt
+                
+                The upper example would the the shortcut: Ctrl+Shift+9
+			
+		<key
+			commandId="tinyos.dlrc.refactoring.rename.local.variable"
+			schemeId="org.eclipse.ui.defaultAcceleratorConfiguration" 
+			sequence="M1+M2+9" />
+        -->   	
+	</extension>
+
+	<!-- Menu Entrys (Main Menu & Popup Menu) -->
+	<extension 
+  		id="add.item"
+		point="org.eclipse.ui.menus">
+		
+		<!-- Entrys in the Top Menu -->
+ 		<menuContribution
+    		locationURI= "menu:org.eclipse.ui.main.menu?after=additions">
+    		<menu
+       			id="tinyos.dlrc.RefactoringMenu"
+       			label="Refactoring" />
+ 		</menuContribution>
+ 		
+		<menuContribution
+    		locationURI= "menu:tinyos.dlrc.RefactoringMenu?after=additions">
+    		
+    		<command
+       			commandId="tinyos.dlrc.refactoring.rename.local.variable"
+       			id= "RenameLocalVariable"
+       			label= "Rename Local Variable">
+       		
+      			<visibleWhen checkEnabled="false">
+        			<!-- It's a Collection, if iterate is left away, the test will never be executed -->
+        			<iterate ifEmpty="false">
+         	 			<!-- The forcePluginActivation-Parameter is absolutly necessary. Otherwise the Property gets never checkt -->
+          				<test property="tinyos.dlrc.refactoring.isAvailable.renameLocalVariable" 
+            				forcePluginActivation="true" />
+       				</iterate>          		
+				</visibleWhen> 
+			</command>
+
+    		<command
+       			commandId="tinyos.dlrc.refactoring.rename.local.functionparameter"
+       			id= "RenameFunctionParameter"
+       			label= "Rename Function Parameter">
+       		
+      			<visibleWhen checkEnabled="false">
+        			<!-- It's a Collection, if iterate is left away, the test will never be executed -->
+        			<iterate ifEmpty="false">
+         	 			<!-- The forcePluginActivation-Parameter is absolutly necessary. Otherwise the Property gets never checkt -->
+          				<test property="tinyos.dlrc.refactoring.isAvailable.renameFunctionParameter" 
+            				forcePluginActivation="true" />
+       				</iterate>          		
+				</visibleWhen> 
+			</command>
+
+    		<command
+       			commandId="tinyos.dlrc.refactoring.rename.global.variable"
+       			id= "RenameGlobalVariable"
+       			label= "Rename Global Variable">
+       			
+      			<visibleWhen checkEnabled="false">
+        			<!-- It's a Collection, if iterate is left away, the test will never be executed -->
+        			<iterate ifEmpty="false">
+          				<!-- The forcePluginActivation-Parameter is absolutly necessary. Otherwise the Property gets never checkt -->
+          				<test property="tinyos.dlrc.refactoring.isAvailable.renameGlobalVariable" 
+            				forcePluginActivation="true" />
+       				</iterate>          		
+      			</visibleWhen> 
+    		</command>
+    		
+    		<command
+       			commandId="tinyos.dlrc.refactoring.rename.implementation.variable"
+       			id= "RenameImplementationLocalVariable"
+       			label= "Rename Implementation Local Variable">
+       			
+      			<visibleWhen checkEnabled="false">
+        			<!-- It's a Collection, if iterate is left away, the test will never be executed -->
+        			<iterate ifEmpty="false">
+          				<!-- The forcePluginActivation-Parameter is absolutly necessary. Otherwise the Property gets never checkt -->
+          				<test property="tinyos.dlrc.refactoring.isAvailable.renameImplementationLocalVariable" 
+            				forcePluginActivation="true" />
+       				</iterate>          		
+      			</visibleWhen> 
+    		</command>
+    		
+    		
+			<command
+       			commandId="tinyos.dlrc.refactoring.rename.global.function"
+       			id= "RenameFunction"
+       			label= "Rename Function">
+       			
+      			<visibleWhen checkEnabled="false">
+        			<!-- It's a Collection, if iterate is left away, the test will never be executed -->
+        			<iterate ifEmpty="false">
+          				<!-- The forcePluginActivation-Parameter is absolutly necessary. Otherwise the Property gets never checkt -->
+          				<test property="tinyos.dlrc.refactoring.isAvailable.renameFunction" 
+            				forcePluginActivation="true" />
+       				</iterate>          		
+      			</visibleWhen> 
+    		</command>
+    		
+			<command
+       			commandId="tinyos.dlrc.refactoring.rename.local.function"
+       			id= "RenameLocalFunction"
+       			label= "Rename Local Function">
+       			
+      			<visibleWhen checkEnabled="false">
+        			<!-- It's a Collection, if iterate is left away, the test will never be executed -->
+        			<iterate ifEmpty="false">
+          				<!-- The forcePluginActivation-Parameter is absolutly necessary. Otherwise the Property gets never checkt -->
+          				<test property="tinyos.dlrc.refactoring.isAvailable.renameLocalFunction" 
+            				forcePluginActivation="true" />
+       				</iterate>          		
+      			</visibleWhen> 
+    		</command>
+    		
+    		<command
+       			commandId="tinyos.dlrc.refactoring.rename.global.interfaces"
+       			id= "RenameInterface"
+       			label= "Rename Interface">
+       			
+      			<visibleWhen checkEnabled="false">
+        			<!-- It's a Collection, if iterate is left away, the test will never be executed -->
+        			<iterate ifEmpty="false">
+          				<!-- The forcePluginActivation-Parameter is absolutly necessary. Otherwise the Property gets never checkt -->
+          				<test property="tinyos.dlrc.refactoring.isAvailable.renameInterface" 
+            				forcePluginActivation="true" />
+       				</iterate>          		
+      			</visibleWhen> 
+    		</command>
+    		
+			<command
+       			commandId="tinyos.dlrc.refactoring.rename.component"
+       			id= "RenameComponent"
+       			label= "Rename Component">
+       			
+      			<visibleWhen checkEnabled="false">
+        			<!-- It's a Collection, if iterate is left away, the test will never be executed -->
+        			<iterate ifEmpty="false">
+          				<!-- The forcePluginActivation-Parameter is absolutly necessary. Otherwise the Property gets never checkt -->
+          				<test property="tinyos.dlrc.refactoring.isAvailable.renameComponent" 
+            				forcePluginActivation="true" />
+       				</iterate>          		
+      			</visibleWhen> 
+    		</command>
+    				
+			<command
+       			commandId="tinyos.dlrc.refactoring.rename.alias.component"
+       			id= "RenameComponentAlias"
+       			label= "Rename Component Alias">
+       			
+      			<visibleWhen checkEnabled="false">
+        			<!-- It's a Collection, if iterate is left away, the test will never be executed -->
+        			<iterate ifEmpty="false">
+          				<!-- The forcePluginActivation-Parameter is absolutly necessary. Otherwise the Property gets never checkt -->
+          				<test property="tinyos.dlrc.refactoring.isAvailable.renameComponentAlias" 
+            				forcePluginActivation="true" />
+       				</iterate>          		
+      			</visibleWhen> 
+    		</command>
+    		
+			<command
+       			commandId="tinyos.dlrc.refactoring.rename.alias.interfaces"
+       			id= "RenameInterfaceAlias"
+       			label= "Rename Interface Alias">
+       			
+      			<visibleWhen checkEnabled="false">
+        			<!-- It's a Collection, if iterate is left away, the test will never be executed -->
+        			<iterate ifEmpty="false">
+          				<!-- The forcePluginActivation-Parameter is absolutly necessary. Otherwise the Property gets never checkt -->
+          				<test property="tinyos.dlrc.refactoring.isAvailable.renameInterfaceAlias" 
+            				forcePluginActivation="true" />
+       				</iterate>          		
+      			</visibleWhen> 
+    		</command>
+    		
+    		<command
+       			commandId="tinyos.dlrc.refactoring.rename.nesc.function"
+       			id= "RenameNescFunction"
+       			label= "Rename Nesc Function">
+       			
+      			<visibleWhen checkEnabled="false">
+        			<!-- It's a Collection, if iterate is left away, the test will never be executed -->
+        			<iterate ifEmpty="false">
+          				<!-- The forcePluginActivation-Parameter is absolutly necessary. Otherwise the Property gets never checkt -->
+          				<test property="tinyos.dlrc.refactoring.isAvailable.renameNescFunction" 
+            				forcePluginActivation="true" />
+       				</iterate>          		
+      			</visibleWhen> 
+    		</command>
+    		
+    		<command
+       			commandId="tinyos.dlrc.refactoring.extractFunction"
+       			id= "extractFunction"
+       			label= "ExtractFunction">
+       			
+      			<visibleWhen checkEnabled="false">
+        			<!-- It's a Collection, if iterate is left away, the test will never be executed -->
+        			<iterate ifEmpty="false">
+          				<!-- The forcePluginActivation-Parameter is absolutly necessary. Otherwise the Property gets never checkt -->
+          				<test property="tinyos.dlrc.refactoring.isAvailable.extractFunction" 
+            				forcePluginActivation="true" />
+       				</iterate>          		
+      			</visibleWhen> 
+    		</command>
+    			
+    		<command
+       			commandId="tinyos.dlrc.refactoring.entities.component.alias.introduce"
+       			id= "introduceComponentAlias"
+       			label= "IntroduceComponentAlias">
+       			
+      			<visibleWhen checkEnabled="false">
+        			<!-- It's a Collection, if iterate is left away, the test will never be executed -->
+        			<iterate ifEmpty="false">
+          				<!-- The forcePluginActivation-Parameter is absolutly necessary. Otherwise the Property gets never checkt -->
+          				<test property="tinyos.dlrc.refactoring.isAvailable.introduceComponentAlias" 
+            				forcePluginActivation="true" />
+       				</iterate>          		
+      			</visibleWhen> 
+    		</command>
+    		
+			<command
+       			commandId="tinyos.dlrc.refactoring.entities.interfaces.alias.introduce"
+       			id= "introduceInterfaceAlias"
+       			label= "IntroduceInterfaceAlias">
+       			
+      			<visibleWhen checkEnabled="false">
+        			<!-- It's a Collection, if iterate is left away, the test will never be executed -->
+        			<iterate ifEmpty="false">
+          				<!-- The forcePluginActivation-Parameter is absolutly necessary. Otherwise the Property gets never checkt -->
+          				<test property="tinyos.dlrc.refactoring.isAvailable.introduceInterfaceAlias" 
+            				forcePluginActivation="true" />
+       				</iterate>          		
+      			</visibleWhen> 
+    		</command>
+    		
+    		<command
+       			commandId="tinyos.dlrc.refactoring.NoRefactoringAvailable"
+       			id= "NoRefactoringAvailable"
+       			label= "No Refactoring Available">
+       			
+      			<visibleWhen checkEnabled="false">
+        			<!-- It's a Collection, if iterate is left away, the test will never be executed -->
+        			<iterate ifEmpty="false">
+          				<!-- The forcePluginActivation-Parameter is absolutly necessary. Otherwise the Property gets never checkt -->
+          				<test property="tinyos.dlrc.refactoring.isAvailable.NoRefactoringAvailable" 
+            				forcePluginActivation="true" />
+       				</iterate>          		
+      			</visibleWhen> 
+    		</command>
+    		
+    		<command
+       			commandId="tinyos.dlrc.refactoring.NotSaved"
+       			id= "NotSaved"
+       			label= "Save all Editors (Required for Refactoring)">
+       			
+      			<visibleWhen checkEnabled="false">
+        			<!-- It's a Collection, if iterate is left away, the test will never be executed -->
+        			<iterate ifEmpty="false">
+          				<!-- The forcePluginActivation-Parameter is absolutly necessary. Otherwise the Property gets never checkt -->
+          				<test property="tinyos.dlrc.refactoring.isAvailable.NotSaved" 
+            				forcePluginActivation="true" />
+       				</iterate>          		
+      			</visibleWhen> 
+    		</command>
+    		
+    		<command
+       			commandId="tinyos.dlrc.refactoring.PluginNotReady"
+       			id= "PluginNotReady"
+       			label= "Plugin not yet Ready">
+       			
+      			<visibleWhen checkEnabled="false">
+        			<!-- It's a Collection, if iterate is left away, the test will never be executed -->
+        			<iterate ifEmpty="false">
+          				<!-- The forcePluginActivation-Parameter is absolutly necessary. Otherwise the Property gets never checkt -->
+          				<test property="tinyos.dlrc.refactoring.isAvailable.PluginNotReady" 
+            				forcePluginActivation="true" />
+       				</iterate>          		
+      			</visibleWhen> 
+    		</command>
+    		
+
+		</menuContribution>
+
+ 		<!-- Entrys in the Popup Menu -->
+		<menuContribution
+			locationURI= "popup:org.eclipse.ui.popup.any?after=additions">
+			<menu
+       			id="tinyos.dlrc.RefactoringPopup"
+       			label="Refactoring" />
+ 		</menuContribution>
+ 
+ 		<menuContribution
+			locationURI="popup:tinyos.dlrc.RefactoringPopup?after=additions">
+			
+				<command 
+					commandId="tinyos.dlrc.refactoring.rename.local.variable">
+					<!-- If checkEnabled = true no additional checks are allowed and the isEnabled() Function of the Action Handler is called. -->
+					<visibleWhen checkEnabled="false">	
+            			<!-- It's a Collection, if iterate is left away, the test will never be executed -->
+          				<iterate ifEmpty="false"> 
+          	  				<!-- The forcePluginActivation-Parameter is absolutly necessary. Otherwise the Property gets never checkt -->
+              				<test property="tinyos.dlrc.refactoring.isAvailable.renameLocalVariable" 
+                    			forcePluginActivation="true" /> 
+          				</iterate>         		
+          			</visibleWhen> 
+				</command>
+        
+        		<command 
+					commandId="tinyos.dlrc.refactoring.rename.local.functionparameter">
+					<!-- If checkEnabled = true no additional checks are allowed and the isEnabled() Function of the Action Handler is called. -->
+					<visibleWhen checkEnabled="false">	
+            			<!-- It's a Collection, if iterate is left away, the test will never be executed -->
+          				<iterate ifEmpty="false"> 
+          	  				<!-- The forcePluginActivation-Parameter is absolutly necessary. Otherwise the Property gets never checkt -->
+              				<test property="tinyos.dlrc.refactoring.isAvailable.renameFunctionParameter" 
+                    			forcePluginActivation="true" /> 
+          				</iterate>         		
+          			</visibleWhen> 
+				</command>
+				
+        		<command 
+        			commandId="tinyos.dlrc.refactoring.rename.global.variable">
+          			<!-- If checkEnabled = true no additional checks are allowed and the isEnabled() Function of the Action Handler is called. -->
+          			<visibleWhen checkEnabled="false">
+            			<!-- It's a Collection, if iterate is left away, the test will never be executed -->
+          				<iterate ifEmpty="false">
+          	  				<!-- The forcePluginActivation-Parameter is absolutly necessary. Otherwise the Property gets never checkt -->
+              				<test property="tinyos.dlrc.refactoring.isAvailable.renameGlobalVariable" 
+                    			forcePluginActivation="true" />
+          				</iterate>          		
+          			</visibleWhen>
+        		</command>
+        		
+        		<command 
+        			commandId="tinyos.dlrc.refactoring.rename.implementation.variable">
+          			<!-- If checkEnabled = true no additional checks are allowed and the isEnabled() Function of the Action Handler is called. -->
+          			<visibleWhen checkEnabled="false">
+            			<!-- It's a Collection, if iterate is left away, the test will never be executed -->
+          				<iterate ifEmpty="false">
+          	  				<!-- The forcePluginActivation-Parameter is absolutly necessary. Otherwise the Property gets never checkt -->
+              				<test property="tinyos.dlrc.refactoring.isAvailable.renameImplementationLocalVariable" 
+                    			forcePluginActivation="true" />
+          				</iterate>          		
+          			</visibleWhen>
+        		</command>
+        		
+				<command 
+        			commandId="tinyos.dlrc.refactoring.rename.global.function">
+          			<!-- If checkEnabled = true no additional checks are allowed and the isEnabled() Function of the Action Handler is called. -->
+          			<visibleWhen checkEnabled="false">
+            			<!-- It's a Collection, if iterate is left away, the test will never be executed -->
+          				<iterate ifEmpty="false">
+          	  				<!-- The forcePluginActivation-Parameter is absolutly necessary. Otherwise the Property gets never checkt -->
+              				<test property="tinyos.dlrc.refactoring.isAvailable.renameGlobalFunction" 
+                    			forcePluginActivation="true" />
+          				</iterate>          		
+          			</visibleWhen>
+        		</command>
+        		
+				<command 
+        			commandId="tinyos.dlrc.refactoring.rename.local.function">
+          			<!-- If checkEnabled = true no additional checks are allowed and the isEnabled() Function of the Action Handler is called. -->
+          			<visibleWhen checkEnabled="false">
+            			<!-- It's a Collection, if iterate is left away, the test will never be executed -->
+          				<iterate ifEmpty="false">
+          	  				<!-- The forcePluginActivation-Parameter is absolutly necessary. Otherwise the Property gets never checkt -->
+              				<test property="tinyos.dlrc.refactoring.isAvailable.renameLocalFunction" 
+                    			forcePluginActivation="true" />
+          				</iterate>          		
+          			</visibleWhen>
+        		</command>
+        		
+				<command 
+        			commandId="tinyos.dlrc.refactoring.rename.global.interfaces">
+          			<!-- If checkEnabled = true no additional checks are allowed and the isEnabled() Function of the Action Handler is called. -->
+          			<visibleWhen checkEnabled="false">
+            			<!-- It's a Collection, if iterate is left away, the test will never be executed -->
+          				<iterate ifEmpty="false">
+          	  				<!-- The forcePluginActivation-Parameter is absolutly necessary. Otherwise the Property gets never checkt -->
+              				<test property="tinyos.dlrc.refactoring.isAvailable.renameInterface" 
+                    			forcePluginActivation="true" />
+          				</iterate>          		
+          			</visibleWhen>
+        		</command>
+        		
+        		<command 
+        			commandId="tinyos.dlrc.refactoring.rename.component">
+          			<!-- If checkEnabled = true no additional checks are allowed and the isEnabled() Function of the Action Handler is called. -->
+          			<visibleWhen checkEnabled="false">
+            			<!-- It's a Collection, if iterate is left away, the test will never be executed -->
+          				<iterate ifEmpty="false">
+          	  				<!-- The forcePluginActivation-Parameter is absolutly necessary. Otherwise the Property gets never checkt -->
+              				<test property="tinyos.dlrc.refactoring.isAvailable.renameComponent" 
+                    			forcePluginActivation="true" />
+          				</iterate>          		
+          			</visibleWhen>
+        		</command>
+        		
+				<command 
+        			commandId="tinyos.dlrc.refactoring.rename.alias.component">
+          			<!-- If checkEnabled = true no additional checks are allowed and the isEnabled() Function of the Action Handler is called. -->
+          			<visibleWhen checkEnabled="false">
+            			<!-- It's a Collection, if iterate is left away, the test will never be executed -->
+          				<iterate ifEmpty="false">
+          	  				<!-- The forcePluginActivation-Parameter is absolutly necessary. Otherwise the Property gets never checkt -->
+              				<test property="tinyos.dlrc.refactoring.isAvailable.renameComponentAlias" 
+                    			forcePluginActivation="true" />
+          				</iterate>          		
+          			</visibleWhen>
+        		</command>
+        		
+        		<command 
+        			commandId="tinyos.dlrc.refactoring.rename.alias.interfaces">
+          			<!-- If checkEnabled = true no additional checks are allowed and the isEnabled() Function of the Action Handler is called. -->
+          			<visibleWhen checkEnabled="false">
+            			<!-- It's a Collection, if iterate is left away, the test will never be executed -->
+          				<iterate ifEmpty="false">
+          	  				<!-- The forcePluginActivation-Parameter is absolutly necessary. Otherwise the Property gets never checkt -->
+              				<test property="tinyos.dlrc.refactoring.isAvailable.renameInterfaceAlias" 
+                    			forcePluginActivation="true" />
+          				</iterate>          		
+          			</visibleWhen>
+        		</command>
+        		
+				<command 
+        			commandId="tinyos.dlrc.refactoring.rename.nesc.function">
+          			<!-- If checkEnabled = true no additional checks are allowed and the isEnabled() Function of the Action Handler is called. -->
+          			<visibleWhen checkEnabled="false">
+            			<!-- It's a Collection, if iterate is left away, the test will never be executed -->
+          				<iterate ifEmpty="false">
+          	  				<!-- The forcePluginActivation-Parameter is absolutly necessary. Otherwise the Property gets never checkt -->
+              				<test property="tinyos.dlrc.refactoring.isAvailable.renameNescFunction" 
+                    			forcePluginActivation="true" />
+          				</iterate>          		
+          			</visibleWhen>
+        		</command>
+        		    		
+        		<command 
+        			commandId="tinyos.dlrc.refactoring.extractFunction">
+          			<!-- If checkEnabled = true no additional checks are allowed and the isEnabled() Function of the Action Handler is called. -->
+          			<visibleWhen checkEnabled="false">
+            			<!-- It's a Collection, if iterate is left away, the test will never be executed -->
+          				<iterate ifEmpty="false">
+          	  				<!-- The forcePluginActivation-Parameter is absolutly necessary. Otherwise the Property gets never checkt -->
+              				<test property="tinyos.dlrc.refactoring.isAvailable.extractFunction" 
+                    			forcePluginActivation="true" />
+          				</iterate>          		
+          			</visibleWhen>
+        		</command>
+        		
+        		<command 
+        			commandId="tinyos.dlrc.refactoring.entities.component.alias.introduce">
+          			<!-- If checkEnabled = true no additional checks are allowed and the isEnabled() Function of the Action Handler is called. -->
+          			<visibleWhen checkEnabled="false">
+            			<!-- It's a Collection, if iterate is left away, the test will never be executed -->
+          				<iterate ifEmpty="false">
+          	  				<!-- The forcePluginActivation-Parameter is absolutly necessary. Otherwise the Property gets never checkt -->
+              				<test property="tinyos.dlrc.refactoring.isAvailable.introduceComponentAlias" 
+                    			forcePluginActivation="true" />
+          				</iterate>          		
+          			</visibleWhen>
+        		</command>
+        		
+				<command 
+        			commandId="tinyos.dlrc.refactoring.entities.interfaces.alias.introduce">
+          			<!-- If checkEnabled = true no additional checks are allowed and the isEnabled() Function of the Action Handler is called. -->
+          			<visibleWhen checkEnabled="false">
+            			<!-- It's a Collection, if iterate is left away, the test will never be executed -->
+          				<iterate ifEmpty="false">
+          	  				<!-- The forcePluginActivation-Parameter is absolutly necessary. Otherwise the Property gets never checkt -->
+              				<test property="tinyos.dlrc.refactoring.isAvailable.introduceInterfaceAlias" 
+                    			forcePluginActivation="true" />
+          				</iterate>          		
+          			</visibleWhen>
+        		</command>
+        		
+				<command 
+        			commandId="tinyos.dlrc.refactoring.NoRefactoringAvailable">
+          			<!-- If checkEnabled = true no additional checks are allowed and the isEnabled() Function of the Action Handler is called. -->
+          			<visibleWhen checkEnabled="false">
+            			<!-- It's a Collection, if iterate is left away, the test will never be executed -->
+          				<iterate ifEmpty="false">
+          	  				<!-- The forcePluginActivation-Parameter is absolutly necessary. Otherwise the Property gets never checkt -->
+              				<test property="tinyos.dlrc.refactoring.isAvailable.NoRefactoringAvailable" 
+                    			forcePluginActivation="true" />
+          				</iterate>          		
+          			</visibleWhen>
+        		</command>
+        		
+        		    		<command
+       			commandId="tinyos.dlrc.refactoring.NotSaved"
+       			id= "NotSaved"
+       			label= "Save all Editors (Required for Refactoring)">
+       			
+      			<visibleWhen checkEnabled="false">
+        			<!-- It's a Collection, if iterate is left away, the test will never be executed -->
+        			<iterate ifEmpty="false">
+          				<!-- The forcePluginActivation-Parameter is absolutly necessary. Otherwise the Property gets never checkt -->
+          				<test property="tinyos.dlrc.refactoring.isAvailable.NotSaved" 
+            				forcePluginActivation="true" />
+       				</iterate>          		
+      			</visibleWhen> 
+    		</command>
+    		
+    		<command
+       			commandId="tinyos.dlrc.refactoring.PluginNotReady"
+       			id= "PluginNotReady"
+       			label= "Plugin not yet Ready">
+       			
+      			<visibleWhen checkEnabled="false">
+        			<!-- It's a Collection, if iterate is left away, the test will never be executed -->
+        			<iterate ifEmpty="false">
+          				<!-- The forcePluginActivation-Parameter is absolutly necessary. Otherwise the Property gets never checkt -->
+          				<test property="tinyos.dlrc.refactoring.isAvailable.PluginNotReady" 
+            				forcePluginActivation="true" />
+       				</iterate>          		
+      			</visibleWhen> 
+    		</command>
+        		
+ 		</menuContribution>
+	</extension>
+
+ 	<extension 
+ 		point="org.eclipse.core.expressions.propertyTesters">
+   		<propertyTester
+     		id="tinyos.dlrc.refactoring.AvailabilityTester"
+     		type="org.eclipse.jface.text.ITextSelection"
+     		namespace="tinyos.dlrc.refactoring.isAvailable"
+     		properties="renameLocalVariable, renameFunctionParameter, renameGlobalVariable, renameImplementationLocalVariable, renameLocalFunction, renameGlobalFunction, renameInterface, renameComponent, renameComponentAlias, renameInterfaceAlias, renameNescFunction, extractFunction, introduceComponentAlias, introduceInterfaceAlias, NoRefactoringAvailable,NotSaved,PluginNotReady"
+     		class="tinyos.dlrc.refactoring.RefactoringsAvailabilityTester" />
+ 	</extension>
+
+</plugin>

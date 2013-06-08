@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.2"?>
+<plugin>
+   <extension
+         point="tinyos.dlrc.core.Environments">
+      <environment
+            class="tinyos.dlrc.environment.unix2.Environment">
+      </environment>
+   </extension>
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            category="tinyos.environment"
+            class="tinyos.dlrc.environment.unix2.preference.EnvironmentPreferencePage"
+            id="TinyOsUnixEnvironmentWrapper2.paths"
+            name="TinyOS 2.x unix-environment">
+      </page>
+      <page
+            category="TinyOsUnixEnvironmentWrapper2.paths"
+            class="tinyos.dlrc.environment.unix2.preference.PlatformIncludePathsPreferencePage"
+            id="TinyOsUnixEnvironmentWrapper2.platforms"
+            name="Platform Paths">
+      </page>
+      <page
+            category="TinyOsUnixEnvironmentWrapper2.paths"
+            class="tinyos.dlrc.environment.unix2.preference.PlatformEnvironmentVariablesPreferencePage"
+            id="TinyOsUnixEnvironmentWrapper2.variables"
+            name="Environment Variables">
+      </page>
+   </extension>
+   <extension
+         point="org.eclipse.core.runtime.preferences">
+      <initializer
+            class="tinyos.dlrc.environment.unix2.preference.PreferenceInitializer">
+      </initializer>
+   </extension>
+   <extension
+         point="tinyos.dlrc.core.ProjectChecker">
+      <checker
+            class="tinyos.dlrc.environment.unix2.validation.EnvironmentChecker">
+      </checker>
+   </extension>
+   <extension
+         point="tinyos.dlrc.core.LaunchVeto">
+      <veto
+            class="tinyos.dlrc.environment.unix2.validation.EnvironmentVariableVeto">
+      </veto>
+   </extension>
+
+</plugin>

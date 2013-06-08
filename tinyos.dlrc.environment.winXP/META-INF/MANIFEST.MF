@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: DLRC - TinyOS Cygwin Wrapper
+Bundle-SymbolicName: tinyos.dlrc.environment.winXP;singleton:=true
+Bundle-Version: 0.1.1
+Bundle-Activator: tinyos.dlrc.environment.winXP.TinyOSWinXPEnvironmentWrapper
+Bundle-Vendor: DLRC
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
+ org.eclipse.core.resources,
+ tinyos.dlrc.core,
+ tinyos.dlrc.environment.basic
+Bundle-ActivationPolicy: lazy
