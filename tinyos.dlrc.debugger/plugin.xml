@@ -104,6 +104,12 @@
    <extension
          point="tinyos.dlrc.debugger.proxyTab">
       <tab
+            class="tinyos.dlrc.debug.launch.configuration.MspdebugProxyTab"
+            order="1.5"></tab>
+      <tab
+            class="tinyos.dlrc.debug.launch.configuration.SnapGateProxyTab"
+            order="1.5"></tab>
+      <tab
             class="tinyos.dlrc.debug.launch.configuration.AvariceGdbProxyTab"
             order="1.5"></tab>
       <tab
