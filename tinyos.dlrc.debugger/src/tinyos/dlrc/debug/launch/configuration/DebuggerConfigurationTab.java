@@ -689,7 +689,7 @@ public class DebuggerConfigurationTab extends AbstractTinyOSDebuggerTab {
 			loadCommandFactoryComboBox(configuration, id);
 			id = configuration.getAttribute(CDTLaunchConfigConst.ATTR_DEBUGGER_PROTOCOL, CDTLaunchConfigConst.CDT_STANDARD_PROTOCOL); //$NON-NLS-1$
 			loadProtocolComboBox(configuration, id);
-			gdbCommandText.setText(configuration.getAttribute( CDTLaunchConfigConst.ATTR_DEBUG_NAME, "avr-gdb" ));
+			gdbCommandText.setText(configuration.getAttribute( CDTLaunchConfigConst.ATTR_DEBUG_NAME, "msp430-gdb" ));
 			gdbInitText.setText(configuration.getAttribute( CDTLaunchConfigConst.ATTR_GDB_INIT, ".gdbinit" ));
 			verboseModeButton.setSelection(configuration.getAttribute( CDTLaunchConfigConst.ATTR_DEBUGGER_VERBOSE_MODE, false ));
 			breakpointsFullPath.setSelection(configuration.getAttribute( CDTLaunchConfigConst.ATTR_DEBUGGER_FULLPATH_BREAKPOINTS, false ));
@@ -730,7 +730,7 @@ public class DebuggerConfigurationTab extends AbstractTinyOSDebuggerTab {
 
 	@Override
 	public void setDefaults(ILaunchConfigurationWorkingCopy configuration) {
-		configuration.setAttribute( CDTLaunchConfigConst.ATTR_DEBUG_NAME, "avr-gdb" );
+		configuration.setAttribute( CDTLaunchConfigConst.ATTR_DEBUG_NAME, "msp430-gdb" );
 		configuration.setAttribute( CDTLaunchConfigConst.ATTR_GDB_INIT, ".gdbinit" );
 		configuration.setAttribute( CDTLaunchConfigConst.ATTR_DEBUGGER_COMMAND_FACTORY, CDTLaunchConfigConst.CDT_STANDARD_COMMAND_FACTORY );
 		configuration.setAttribute( CDTLaunchConfigConst.ATTR_DEBUGGER_PROTOCOL, CDTLaunchConfigConst.CDT_STANDARD_PROTOCOL );
