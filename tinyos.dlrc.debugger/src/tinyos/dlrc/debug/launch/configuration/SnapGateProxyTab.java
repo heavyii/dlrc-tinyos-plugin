@@ -117,7 +117,7 @@ public class SnapGateProxyTab extends AbstractTinyOSDebuggerTab implements
 	}
 
 	private String getProgramName() {
-		return "/usr/local/bin/mspdebug-snapgate";
+		return "mspdebug-snapgate";
 	}
 	
 	@Override
@@ -309,8 +309,7 @@ public class SnapGateProxyTab extends AbstractTinyOSDebuggerTab implements
 	private void getUSBDevices() {
 		if(snapgateCombo.getText().isEmpty() || serverPort.getText().isEmpty())
 			return;
-		System.out.println(getProgramName() + "-i" + snapgateCombo.getText() + "-P" + serverPort.getText() + "-l");
-		ProcessBuilder pb = new ProcessBuilder(getProgramName(), "-i", snapgateCombo.getText(), "-P", serverPort.getText(), "-l");
+		ProcessBuilder pb = new ProcessBuilder(getProgramName(), "-l", "-i", snapgateCombo.getText(), "-P", serverPort.getText());
 		Process p;
 		try {
 			p = pb.start();
