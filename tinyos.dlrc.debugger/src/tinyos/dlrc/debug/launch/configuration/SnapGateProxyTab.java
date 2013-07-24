@@ -28,6 +28,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
@@ -37,6 +39,7 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
@@ -48,6 +51,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
 import tinyos.dlrc.debug.TinyOSDebugPlugin;
+import tinyos.dlrc.debug.CDTAbstractionLayer.CDTLaunchConfigConst;
 
 public class SnapGateProxyTab extends AbstractTinyOSDebuggerTab implements
 		IGdbProxyConfigurationTab {
@@ -63,7 +67,11 @@ public class SnapGateProxyTab extends AbstractTinyOSDebuggerTab implements
 	public static final String ATTR_PROTOCOL = PROXY_CONFIG_ID + ".protocol";
 	public static final String ATTR_GDB_PORT = PROXY_CONFIG_ID + ".gdbPort";
 	public static final String ATTR_SERVER_PORT = PROXY_CONFIG_ID + ".serverPort";
-
+	public static final String ATTR_UPLOAD_CHECK = PROXY_CONFIG_ID
+			+ ".uploadCheck";
+	public static final String ATTR_PROGRAM_PATH = PROXY_CONFIG_ID
+			+ ".programPath";
+	
 	private List<String> snapgateIPList;
 	private Combo snapgateCombo;
 	private Button snapgateAddButton;
@@ -77,6 +85,11 @@ public class SnapGateProxyTab extends AbstractTinyOSDebuggerTab implements
 	private Combo protocolCombo;
 	private Text gdbPort;
 	private Text serverPort;
+	private String programPathName;
+	private Button uploadCheck;
+	private Text programPath;
+	private Button programDefault;
+	
 	public enum DriverFlag {
 		USB_ACCESS, TTY_ACCESS
 	}
@@ -127,6 +140,10 @@ public class SnapGateProxyTab extends AbstractTinyOSDebuggerTab implements
 				+ " -p " + gdbPort.getText()
 				+ " -i " + snapgateCombo.getText()
 				+ " -P " + serverPort.getText();
+		
+		if(uploadCheck.getSelection())
+			command = command + " -f " + programPath.getText();
+		
 		return command;
 	}
 
@@ -135,6 +152,39 @@ public class SnapGateProxyTab extends AbstractTinyOSDebuggerTab implements
 		return PROXY_CONFIG_ID;
 	}
 
+	private void createProgramPathSetting(Composite parent) {
+		uploadCheck = createCheckButton(parent, "upload program");
+		
+		GridData data;
+		programPath = new Text(parent, SWT.SINGLE | SWT.BORDER);
+		programPath.setLayoutData(data = new GridData(SWT.LEFT, SWT.CENTER,
+				true, false));
+		data.widthHint = 600;
+		programPath.setText("");
+		programPath.setEnabled(false);
+		programPath.addModifyListener(new ModifyListener() {
+			public void modifyText(ModifyEvent evt) {
+				if (!isInitializing()) {
+					setDirty(true);
+					updateLaunchConfigurationDialog();
+				}
+			}
+		});
+		uploadCheck.addSelectionListener(new SelectionAdapter() {
+
+			public void widgetSelected(SelectionEvent e) {
+				programPath.setEnabled(uploadCheck.getSelection());
+				if(!programPathName.isEmpty()) {
+					programPath.setText(programPathName);
+				}
+				if (!isInitializing()) {
+					setDirty(true);
+					updateLaunchConfigurationDialog();
+				}
+			}
+		});
+	}
+	
 	@Override
 	public void createControl(Composite parent) {
 
@@ -146,6 +196,7 @@ public class SnapGateProxyTab extends AbstractTinyOSDebuggerTab implements
 		createMSPDebugSelection(content);
 		createPortSetting(content);
 		createServerPortSetting(content);
+		createProgramPathSetting(content);
 	}
 
 	@Override
@@ -153,54 +204,65 @@ public class SnapGateProxyTab extends AbstractTinyOSDebuggerTab implements
 		return "SnapGate";
 	}
 
+	private String getProgramPath(ILaunchConfiguration configuration) {
+		String projectString = "";
+		String programString = "";
+		try {
+			projectString = configuration.getAttribute(
+					CDTLaunchConfigConst.ATTR_PROJECT_NAME, "");
+			programString = configuration.getAttribute(
+					CDTLaunchConfigConst.ATTR_PROGRAM_NAME, "");
+		} catch (CoreException ce) {
+			TinyOSDebugPlugin.getDefault().log(
+					"Exception while initializing mspdebug proxy tab", ce);
+		}
+
+		if (projectString.length() < 1) {
+			return null;
+		}
+		IProject project = ResourcesPlugin.getWorkspace().getRoot()
+				.getProject(projectString);
+		programString = project.getLocation().toString() + "/" + programString;
+		return programString;
+	}
+	
 	@SuppressWarnings("unchecked")
 	@Override
 	public void initializeFrom(ILaunchConfiguration configuration) {
 		setInitializing(true);
-
-		snapgateIPList = new ArrayList<String>();;
-		String ipText = "";
-		int driverIndex = 0;
-		boolean usbConnection = true;
-		String usbSerial = "";
-		boolean ttyConnection = false;
-		String ttystring = "";
-		int protocolIndex = 0;
-		String gdbPortText = "";
-		String serverPortText = "";
+		
 		try {
+			snapgateIPList = new ArrayList<String>();
 			List<String> defaultList = new ArrayList<String>();
 			defaultList.add("192.168.14.100");
 			snapgateIPList = configuration.getAttribute(ATTR_IP_LIST, defaultList);
-			ipText = configuration.getAttribute(ATTR_IP, "192.168.14.100");
-			driverIndex = configuration.getAttribute(ATTR_DRIVER, 5);// ft232h
-			usbConnection = configuration.getAttribute(ATTR_USB_BUTTON, true);
-			usbSerial = configuration.getAttribute(ATTR_USB_SERIAL, "SNP0001");
-			ttyConnection = configuration.getAttribute(ATTR_TTY_BUTTON, false);
-			ttystring = configuration.getAttribute(ATTR_TTY_STRING,
-					"/dev/ttyUSB0");
-			protocolIndex = configuration.getAttribute(ATTR_PROTOCOL, 1); // JTAG
-			gdbPortText = configuration.getAttribute(ATTR_GDB_PORT, "7000");
-			serverPortText = configuration.getAttribute(ATTR_SERVER_PORT, "32000");
+			for(String text:snapgateIPList)
+			{
+				snapgateCombo.add(text);
+			}
+			snapgateCombo.setText(configuration.getAttribute(ATTR_IP, "192.168.14.100"));
+			driverCombo.select(configuration.getAttribute(ATTR_DRIVER, 5));// ft232h
+			usbConnectionButton.setSelection(configuration.getAttribute(ATTR_USB_BUTTON, true));
+			usbDeviceCombo.add(configuration.getAttribute(ATTR_USB_SERIAL, "SNP0001"));
+			usbDeviceCombo.select(0);
+			ttyConnectionButton.setSelection(configuration.getAttribute(ATTR_TTY_BUTTON, false));
+			ttyDevice.setText(configuration.getAttribute(ATTR_TTY_STRING,
+					"/dev/ttyUSB0"));
+			protocolCombo.select(configuration.getAttribute(ATTR_PROTOCOL, 1)); // JTAG
+			gdbPort.setText(configuration.getAttribute(ATTR_GDB_PORT, "7000"));
+			serverPort.setText(configuration.getAttribute(ATTR_SERVER_PORT, "32000"));
+			uploadCheck.setSelection(configuration.getAttribute(
+					ATTR_UPLOAD_CHECK, false));
+			programPath.setText(configuration.getAttribute(ATTR_PROGRAM_PATH,
+					""));
 		} catch (CoreException ce) {
 			TinyOSDebugPlugin.getDefault().log(
 					"Exception while initializing mspdebug proxy tab", ce);
 		}
 		
-		for(String text:snapgateIPList)
-		{
-			snapgateCombo.add(text);
-		}
-		snapgateCombo.setText(ipText);
-		driverCombo.select(driverIndex);
-		usbConnectionButton.setSelection(usbConnection);
-		usbDeviceCombo.add(usbSerial);
-		usbDeviceCombo.select(0);
-		ttyConnectionButton.setSelection(ttyConnection);
-		ttyDevice.setText(ttystring);
-		protocolCombo.select(protocolIndex);
-		gdbPort.setText(gdbPortText);
-		serverPort.setText(serverPortText);
+		programPath.setEnabled(uploadCheck.getSelection());
+		programPathName = getProgramPath(configuration);
+
 		setInitializing(false);
 	}
 
@@ -222,6 +284,8 @@ public class SnapGateProxyTab extends AbstractTinyOSDebuggerTab implements
 					protocolCombo.getSelectionIndex());
 			configuration.setAttribute(ATTR_GDB_PORT, gdbPort.getText());
 			configuration.setAttribute(ATTR_SERVER_PORT, serverPort.getText());
+			configuration.setAttribute(ATTR_UPLOAD_CHECK, uploadCheck.getSelection());
+			configuration.setAttribute(ATTR_PROGRAM_PATH, programPath.getText());
 		}
 	}
 
@@ -239,6 +303,8 @@ public class SnapGateProxyTab extends AbstractTinyOSDebuggerTab implements
 		configuration.setAttribute(ATTR_PROTOCOL, 1); // JTAG
 		configuration.setAttribute(ATTR_GDB_PORT, "7000");
 		configuration.setAttribute(ATTR_SERVER_PORT, "32000");
+		configuration.setAttribute(ATTR_UPLOAD_CHECK, false);
+		configuration.setAttribute(ATTR_PROGRAM_PATH, "");
 	}
 
 	private boolean portIsValid(String text) {

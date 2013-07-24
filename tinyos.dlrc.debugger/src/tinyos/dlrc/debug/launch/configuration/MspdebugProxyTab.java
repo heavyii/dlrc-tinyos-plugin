@@ -26,12 +26,16 @@ import java.io.InputStreamReader;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
@@ -43,9 +47,12 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
 import tinyos.dlrc.debug.TinyOSDebugPlugin;
+import tinyos.dlrc.debug.CDTAbstractionLayer.CDTLaunchConfigConst;
 
-public class MspdebugProxyTab extends AbstractTinyOSDebuggerTab implements IGdbProxyConfigurationTab{
-	public static final String PROXY_CONFIG_ID = ITinyOSDebugLaunchConstants.TINYOS_DBG_LAUNCH_ID + ".mspdebugProxyTab";
+public class MspdebugProxyTab extends AbstractTinyOSDebuggerTab implements
+		IGdbProxyConfigurationTab {
+	public static final String PROXY_CONFIG_ID = ITinyOSDebugLaunchConstants.TINYOS_DBG_LAUNCH_ID
+			+ ".mspdebugProxyTab";
 	public static final String ATTR_DRIVER = PROXY_CONFIG_ID + ".driver";
 	public static final String ATTR_USB_BUTTON = PROXY_CONFIG_ID + ".usbButton";
 	public static final String ATTR_USB_SERIAL = PROXY_CONFIG_ID + ".usbSerial";
@@ -53,195 +60,266 @@ public class MspdebugProxyTab extends AbstractTinyOSDebuggerTab implements IGdbP
 	public static final String ATTR_TTY_STRING = PROXY_CONFIG_ID + ".ttyString";
 	public static final String ATTR_PROTOCOL = PROXY_CONFIG_ID + ".protocol";
 	public static final String ATTR_GDB_PORT = PROXY_CONFIG_ID + ".port";
-	
+	public static final String ATTR_UPLOAD_CHECK = PROXY_CONFIG_ID
+			+ ".uploadCheck";
+	public static final String ATTR_PROGRAM_PATH = PROXY_CONFIG_ID
+			+ ".programPath";
+
 	private Combo driverCombo;
 	private Button usbConnectionButton;
-	private Combo usbDeviceCombo; 
+	private Combo usbDeviceCombo;
 	private Button ttyConnectionButton;
 	private Text ttyDevice;
 	private Combo protocolCombo;
 	private Text gdbPort;
+	private String programPathName;
+	private Button uploadCheck;
+	private Text programPath;
+	private Button programDefault;
 	
 	public enum DriverFlag {
-		USB_ACCESS,
-		TTY_ACCESS
+		USB_ACCESS, TTY_ACCESS
 	}
-	
+
 	public enum Driver {
-		RF2500("rf2500", DriverFlag.USB_ACCESS),
-		OLIMEX("olimex", DriverFlag.TTY_ACCESS,DriverFlag.USB_ACCESS),
-		OLIMEX_ISO("olimex-iso", DriverFlag.USB_ACCESS),
-		SIM("sim"),
-		UIF("uif", DriverFlag.TTY_ACCESS,DriverFlag.USB_ACCESS),
-		FT232H("ft232h", DriverFlag.USB_ACCESS),
-		UIF_BSL("uif-bsl", DriverFlag.TTY_ACCESS),
-		FLASH_BSL("flash-bsl", DriverFlag.TTY_ACCESS),
-		GDBC("gdbc"),
-		TILIB("tilib");
-		
+		RF2500("rf2500", DriverFlag.USB_ACCESS), OLIMEX("olimex",
+				DriverFlag.TTY_ACCESS, DriverFlag.USB_ACCESS), OLIMEX_ISO(
+				"olimex-iso", DriverFlag.USB_ACCESS), SIM("sim"), UIF("uif",
+				DriverFlag.TTY_ACCESS, DriverFlag.USB_ACCESS), FT232H("ft232h",
+				DriverFlag.USB_ACCESS), UIF_BSL("uif-bsl",
+				DriverFlag.TTY_ACCESS), FLASH_BSL("flash-bsl",
+				DriverFlag.TTY_ACCESS), GDBC("gdbc"), TILIB("tilib");
+
 		private final String id;
 		private final DriverFlag[] flags;
-		
+
 		Driver(String id, DriverFlag... flags) {
 			this.id = id;
 			this.flags = flags;
 		}
-		
+
 		public String getId() {
 			return id;
 		}
-		
+
 		public DriverFlag[] getFlags() {
 			return flags;
 		}
-		
+
 		public boolean hasFlag(DriverFlag flag) {
-			for(DriverFlag f: flags) {
-				if( flag.equals(f)) {
+			for (DriverFlag f : flags) {
+				if (flag.equals(f)) {
 					return true;
 				}
 			}
 			return false;
 		}
 	}
-		
+
 	@Override
-	public String getCommand(){
+	public String getCommand() {
 		String command = "mspdebug";
-		if(usbConnectionButton.getSelection()) {
+		if (usbConnectionButton.getSelection()) {
 			command = command + " -s " + usbDeviceCombo.getText();
 		} else if (ttyConnectionButton.getSelection()) {
 			command = command + " -d " + ttyDevice.getText();
 		}
-		
-		if(protocolCombo.getSelectionIndex() == 1) {
+
+		if (protocolCombo.getSelectionIndex() == 1) {
 			command = command + " -j";
 		}
+		command = command + " " + driverCombo.getText();
 		
-		command = command + " " + driverCombo.getText() + " \"gdb " + gdbPort.getText() + "\"";
+		if(uploadCheck.getSelection())
+			command = command + " \"prog " + programPathName + "\"";
+		
+		command = command + " \"reset\"";
+		command = command + " \"gdb " + gdbPort.getText() + "\"";
+		// TODO: upload program to target
+		{
+			System.out.println("program: " + programPathName);
+		}
 		return command;
 	}
 
 	@Override
-	public String getID(){
+	public String getID() {
 		return PROXY_CONFIG_ID;
 	}
 
-	
 	@Override
-	public void createControl( Composite parent ){
-		Composite content = new Composite( parent, SWT.NONE );
-		content.setLayout( new GridLayout( 2, false ) );
-		content.setLayoutData( new GridData( SWT.LEFT, SWT.TOP, false, false ) );
+	public void createControl(Composite parent) {
+		Composite content = new Composite(parent, SWT.NONE);
+		content.setLayout(new GridLayout(2, false));
+		content.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 
-		createMSPDebugSelection( content );
-		createPortSetting( content );
+		createMSPDebugSelection(content);
+		createPortSetting(content);
+		createProgramPathSetting(content);
 	}
-	
+
 	@Override
-	public String getName(){
+	public String getName() {
 		return "mspdebug";
 	}
 
+	private String getProgramPath(ILaunchConfiguration configuration) {
+		String projectString = "";
+		String programString = "";
+		try {
+			projectString = configuration.getAttribute(
+					CDTLaunchConfigConst.ATTR_PROJECT_NAME, "");
+			programString = configuration.getAttribute(
+					CDTLaunchConfigConst.ATTR_PROGRAM_NAME, "");
+		} catch (CoreException ce) {
+			TinyOSDebugPlugin.getDefault().log(
+					"Exception while initializing mspdebug proxy tab", ce);
+		}
+
+		if (projectString.length() < 1) {
+			return null;
+		}
+		IProject project = ResourcesPlugin.getWorkspace().getRoot()
+				.getProject(projectString);
+		programString = project.getLocation().toString() + "/" + programString;
+		return programString;
+	}
+
 	@Override
-	public void initializeFrom( ILaunchConfiguration configuration ){
+	public void initializeFrom(ILaunchConfiguration configuration) {
 		setInitializing(true);
 
-		int driverIndex = 0;
-		boolean usbConnection = true;
-		String usbSerial = "";
-		boolean ttyConnection = false;
-		String ttystring = "";
-		int protocolIndex = 0;
-		String gdbPortText = "";
 		try {
-			driverIndex = configuration.getAttribute( ATTR_DRIVER,  5);//ft232h
-			usbConnection = configuration.getAttribute( ATTR_USB_BUTTON, true);
-			usbSerial = configuration.getAttribute( ATTR_USB_SERIAL,  "");
-			ttyConnection = configuration.getAttribute( ATTR_TTY_BUTTON,  false);
-			ttystring = configuration.getAttribute( ATTR_TTY_STRING,  "/dev/ttyUSB0");
-			protocolIndex = configuration.getAttribute( ATTR_PROTOCOL,  1); //JTAG
-			gdbPortText = configuration.getAttribute( ATTR_GDB_PORT,  "7000");
+			driverCombo.select(configuration.getAttribute(ATTR_DRIVER, 5));// ft232h
+			usbConnectionButton.setSelection(configuration.getAttribute(
+					ATTR_USB_BUTTON, true));
+			usbDeviceCombo.add(configuration.getAttribute(ATTR_USB_SERIAL, ""));
+			usbDeviceCombo.select(0);
+			ttyConnectionButton.setSelection(configuration.getAttribute(
+					ATTR_TTY_BUTTON, false));
+			ttyDevice.setText(configuration.getAttribute(ATTR_TTY_STRING,
+					"/dev/ttyUSB0"));
+			protocolCombo.select(configuration.getAttribute(ATTR_PROTOCOL, 1));
+			gdbPort.setText(configuration.getAttribute(ATTR_GDB_PORT, "7000"));
+			uploadCheck.setSelection(configuration.getAttribute(
+					ATTR_UPLOAD_CHECK, false));
+			programPath.setText(configuration.getAttribute(ATTR_PROGRAM_PATH,
+					""));
 		} catch (CoreException ce) {
-			TinyOSDebugPlugin.getDefault().log("Exception while initializing mspdebug proxy tab", ce);
+			TinyOSDebugPlugin.getDefault().log(
+					"Exception while initializing mspdebug proxy tab", ce);
 		}
-		driverCombo.select(driverIndex);
-		usbConnectionButton.setSelection(usbConnection);
-		usbDeviceCombo.add(usbSerial);
-		usbDeviceCombo.select(0);
-		ttyConnectionButton.setSelection(ttyConnection);
-		ttyDevice.setText(ttystring);
-		protocolCombo.select(protocolIndex);
-		gdbPort.setText(gdbPortText);
-		
+
+		programPath.setEnabled(uploadCheck.getSelection());
+		programPathName = getProgramPath(configuration);
 		setInitializing(false);
 	}
 
 	@Override
-	public void performApply( ILaunchConfigurationWorkingCopy configuration ){
-		if( isDirty() ){
-			configuration.setAttribute( ATTR_DRIVER,  driverCombo.getSelectionIndex());
-			configuration.setAttribute( ATTR_USB_BUTTON, usbConnectionButton.getSelection());
-			configuration.setAttribute( ATTR_USB_SERIAL,  usbDeviceCombo.getText());
-			configuration.setAttribute( ATTR_TTY_BUTTON,  ttyConnectionButton.getSelection());
-			configuration.setAttribute( ATTR_TTY_STRING,  ttyDevice.getText());
-			configuration.setAttribute( ATTR_PROTOCOL,  protocolCombo.getSelectionIndex());
-			configuration.setAttribute( ATTR_GDB_PORT,  gdbPort.getText());
-			//setDirty(false);
+	public void performApply(ILaunchConfigurationWorkingCopy configuration) {
+		if (isDirty()) {
+			configuration.setAttribute(ATTR_DRIVER,
+					driverCombo.getSelectionIndex());
+			configuration.setAttribute(ATTR_USB_BUTTON,
+					usbConnectionButton.getSelection());
+			configuration.setAttribute(ATTR_USB_SERIAL,
+					usbDeviceCombo.getText());
+			configuration.setAttribute(ATTR_TTY_BUTTON,
+					ttyConnectionButton.getSelection());
+			configuration.setAttribute(ATTR_TTY_STRING, ttyDevice.getText());
+			configuration.setAttribute(ATTR_PROTOCOL,
+					protocolCombo.getSelectionIndex());
+			configuration.setAttribute(ATTR_GDB_PORT, gdbPort.getText());
+			configuration.setAttribute(ATTR_UPLOAD_CHECK, uploadCheck.getSelection());
+			configuration.setAttribute(ATTR_PROGRAM_PATH, programPath.getText());
 		}
 	}
 
 	@Override
-	public void setDefaults( ILaunchConfigurationWorkingCopy configuration ){
-		configuration.setAttribute( ATTR_DRIVER,  5);//ft232h
-		configuration.setAttribute( ATTR_USB_BUTTON, true);
-		configuration.setAttribute( ATTR_USB_SERIAL,  "");
-		configuration.setAttribute( ATTR_TTY_BUTTON,  false);
-		configuration.setAttribute( ATTR_TTY_STRING,  "/dev/ttyUSB0");
-		configuration.setAttribute( ATTR_PROTOCOL,  1); //JTAG
-		configuration.setAttribute( ATTR_GDB_PORT,  "7000");
+	public void setDefaults(ILaunchConfigurationWorkingCopy configuration) {
+		configuration.setAttribute(ATTR_DRIVER, 5);// ft232h
+		configuration.setAttribute(ATTR_USB_BUTTON, true);
+		configuration.setAttribute(ATTR_USB_SERIAL, "");
+		configuration.setAttribute(ATTR_TTY_BUTTON, false);
+		configuration.setAttribute(ATTR_TTY_STRING, "/dev/ttyUSB0");
+		configuration.setAttribute(ATTR_PROTOCOL, 1); // JTAG
+		configuration.setAttribute(ATTR_GDB_PORT, "7000");
+		configuration.setAttribute(ATTR_UPLOAD_CHECK, false);
+		configuration.setAttribute(ATTR_PROGRAM_PATH, "");
 	}
-	
+
 	private boolean gdbServerPortIsValid() {
 		try {
-			int port = Integer.parseInt( gdbPort.getText() );
-			return ( port > 0 && port <= 0xFFFF );
-		}
-		catch( NumberFormatException e ) {
+			int port = Integer.parseInt(gdbPort.getText());
+			return (port > 0 && port <= 0xFFFF);
+		} catch (NumberFormatException e) {
 			return false;
 		}
 	}
-	
-	private void createPortSetting( Composite parent ){
-		Label gdbServerPortLabel = new Label( parent, SWT.NONE );
-		gdbServerPortLabel.setText("Listen for GDB on port"); //$NON-NLS-1$
-		gdbServerPortLabel.setLayoutData( new GridData( SWT.FILL, SWT.CENTER, false, false ) );
 
+	private void createProgramPathSetting(Composite parent) {
+		uploadCheck = createCheckButton(parent, "upload program");
+		
 		GridData data;
-		gdbPort = new Text( parent, SWT.SINGLE | SWT.BORDER );
-		gdbPort.setLayoutData( data = new GridData( SWT.LEFT, SWT.CENTER, true, false ));
-		data.widthHint = 45;
-		gdbPort.setText("7000");
-		gdbPort.addModifyListener(new ModifyListener() {
+		programPath = new Text(parent, SWT.SINGLE | SWT.BORDER);
+		programPath.setLayoutData(data = new GridData(SWT.LEFT, SWT.CENTER,
+				true, false));
+		data.widthHint = 600;
+		programPath.setText("");
+		programPath.setEnabled(false);
+		programPath.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent evt) {
-				String error = "Invalid server port";
-				if(!gdbServerPortIsValid()) {
-					setErrorCondition(error);
+				if (!isInitializing()) {
+					setDirty(true);
+					updateLaunchConfigurationDialog();
 				}
-				else {
-					removeErrorCondition(error);
+			}
+		});
+		uploadCheck.addSelectionListener(new SelectionAdapter() {
+
+			public void widgetSelected(SelectionEvent e) {
+				programPath.setEnabled(uploadCheck.getSelection());
+				if(!programPathName.isEmpty()) {
+					programPath.setText(programPathName);
 				}
-				if ( !isInitializing() ) {
+				if (!isInitializing()) {
 					setDirty(true);
 					updateLaunchConfigurationDialog();
 				}
 			}
 		});
 	}
-	
+
+	private void createPortSetting(Composite parent) {
+		Label gdbServerPortLabel = new Label(parent, SWT.NONE);
+		gdbServerPortLabel.setText("Listen for GDB on port"); //$NON-NLS-1$
+		gdbServerPortLabel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER,
+				false, false));
+
+		GridData data;
+		gdbPort = new Text(parent, SWT.SINGLE | SWT.BORDER);
+		gdbPort.setLayoutData(data = new GridData(SWT.LEFT, SWT.CENTER, true,
+				false));
+		data.widthHint = 45;
+		gdbPort.setText("7000");
+		gdbPort.addModifyListener(new ModifyListener() {
+			public void modifyText(ModifyEvent evt) {
+				String error = "Invalid server port";
+				if (!gdbServerPortIsValid()) {
+					setErrorCondition(error);
+				} else {
+					removeErrorCondition(error);
+				}
+				if (!isInitializing()) {
+					setDirty(true);
+					updateLaunchConfigurationDialog();
+				}
+			}
+		});
+	}
+
 	private void getUSBDevices() {
-		ProcessBuilder pb = new ProcessBuilder("mspdebug",
-				"--usb-list");
+		ProcessBuilder pb = new ProcessBuilder("mspdebug", "--usb-list");
 		Process p;
 		try {
 			p = pb.start();
@@ -249,14 +327,14 @@ public class MspdebugProxyTab extends AbstractTinyOSDebuggerTab implements IGdbP
 			e.printStackTrace();
 			return;
 		}
-		
+
 		BufferedReader lineReader = new BufferedReader(new InputStreamReader(
 				p.getInputStream()));
-	
+
 		Pattern descPattern = Pattern.compile("(.*)\\[serial: (.*)\\]");
-		
+
 		usbDeviceCombo.removeAll();
-		while(true) {
+		while (true) {
 			String line;
 			try {
 				line = lineReader.readLine();
@@ -264,34 +342,34 @@ public class MspdebugProxyTab extends AbstractTinyOSDebuggerTab implements IGdbP
 				e.printStackTrace();
 				return;
 			}
-			if( line == null ) { 
+			if (line == null) {
 				break;
 			}
-			if( line.startsWith("Devices on")) {
+			if (line.startsWith("Devices on")) {
 				continue;
 			}
-			
+
 			line = line.trim();
 			String[] fields = line.split(" ", 3);
-			if( fields.length < 3 )
+			if (fields.length < 3)
 				continue;
 
 			String description = "";
 			description = fields[2];
 
 			Matcher m = descPattern.matcher(description);
-			if( m.matches() ) {
+			if (m.matches()) {
 				String serial = m.group(2);
-				if( serial.length() < 3 )
+				if (serial.length() < 3)
 					continue;
-				
-				usbDeviceCombo.add(serial);		
+
+				usbDeviceCombo.add(serial);
 			}
 		}
 	}
-	
+
 	private void updateDriverConnection() {
-		//device --> button & protocol
+		// device --> button & protocol
 		String value = driverCombo.getText();
 		for (Driver d : Driver.values()) {
 			if (value.equals(d.getId())) {
@@ -299,89 +377,90 @@ public class MspdebugProxyTab extends AbstractTinyOSDebuggerTab implements IGdbP
 				boolean ttyaccess = d.hasFlag(DriverFlag.TTY_ACCESS);
 				usbConnectionButton.setEnabled(usbaccess);
 				usbDeviceCombo.setEnabled(usbaccess);
-				
+
 				ttyConnectionButton.setEnabled(ttyaccess);
 				ttyDevice.setEnabled(ttyaccess);
-				
-				if(usbaccess != ttyaccess) {
+
+				if (usbaccess != ttyaccess) {
 					usbConnectionButton.setSelection(usbaccess);
 					ttyConnectionButton.setSelection(ttyaccess);
 				}
-				
+
 				break;
 			}
 		}
 	}
-	
+
 	private void createMSPDebugSelection(Composite parent) {
 		ModifyListener setDirtyModifyListener = new ModifyListener() {
 			public void modifyText(ModifyEvent evt) {
-				if ( !isInitializing() ) {
+				if (!isInitializing()) {
 					setDirty(true);
 					updateLaunchConfigurationDialog();
 				}
 			}
 		};
-		
+
 		SelectionListener buttonSelectionListener = new SelectionListener() {
-			
+
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				if ( !isInitializing() ) {
+				if (!isInitializing()) {
 					setDirty(true);
 					updateLaunchConfigurationDialog();
 				}
 			}
-			
+
 			@Override
 			public void widgetDefaultSelected(SelectionEvent e) {
 				// Nothing
 			}
 		};
-		
-		//driver selection
+
+		// driver selection
 		Label label = new Label(parent, SWT.NONE);
 		label.setText("Driver:");
 		label.setLayoutData(new GridData());
-		
+
 		driverCombo = new Combo(parent, SWT.READ_ONLY);
 		for (Driver d : Driver.values()) {
 			driverCombo.add(d.getId());
 		}
 		driverCombo.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent evt) {
-				if ( !isInitializing() ) {
+				if (!isInitializing()) {
 					updateDriverConnection();
 					setDirty(true);
 					updateLaunchConfigurationDialog();
 				}
 			}
 		});
-		
-		//connection selection
+
+		// connection selection
 		label = new Label(parent, SWT.NONE);
 		label.setText("Connection:");
 		label.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
-	
+
 		Composite group = new Composite(parent, SWT.NONE);
 		group.setLayout(new GridLayout(2, false));
-		
-		//usb serial
+
+		// usb serial
 		usbConnectionButton = new Button(group, SWT.RADIO);
 		usbConnectionButton.setText("USB serial");
 		usbConnectionButton.setLayoutData(new GridData());
 		usbConnectionButton.addSelectionListener(buttonSelectionListener);
-		
+
 		usbDeviceCombo = new Combo(group, SWT.READ_ONLY);
-		usbDeviceCombo.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false, 1, 1));
+		usbDeviceCombo.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false,
+				false, 1, 1));
 		getUSBDevices();
 		usbDeviceCombo.addModifyListener(setDirtyModifyListener);
 
-		//tty
+		// tty
 		ttyConnectionButton = new Button(group, SWT.RADIO);
 		ttyConnectionButton.setText("TTY:");
 		ttyConnectionButton.addSelectionListener(buttonSelectionListener);
-		
+
 		ttyDevice = new Text(group, SWT.BORDER);
 		GridData gridData = new GridData(SWT.LEFT, SWT.TOP, false, false, 1, 1);
 		gridData.grabExcessHorizontalSpace = true;
@@ -389,15 +468,15 @@ public class MspdebugProxyTab extends AbstractTinyOSDebuggerTab implements IGdbP
 		gridData.verticalSpan = 2;
 		ttyDevice.setLayoutData(gridData);
 		ttyDevice.addModifyListener(setDirtyModifyListener);
-		
-		//protocal seletion
+
+		// protocal seletion
 		label = new Label(parent, SWT.NONE);
 		label.setText("Protocol:");
 		label.setLayoutData(new GridData());
-		
+
 		protocolCombo = new Combo(parent, SWT.READ_ONLY);
 		protocolCombo.add("SBW");
 		protocolCombo.add("JTAG");
 		protocolCombo.addModifyListener(setDirtyModifyListener);
-	}	
+	}
 }
