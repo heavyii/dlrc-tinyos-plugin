@@ -66,7 +66,6 @@ public class SnapGateProxyTab extends AbstractTinyOSDebuggerTab implements
 	public static final String ATTR_TTY_STRING = PROXY_CONFIG_ID + ".ttyString";
 	public static final String ATTR_PROTOCOL = PROXY_CONFIG_ID + ".protocol";
 	public static final String ATTR_GDB_PORT = PROXY_CONFIG_ID + ".gdbPort";
-	public static final String ATTR_SERVER_PORT = PROXY_CONFIG_ID + ".serverPort";
 	public static final String ATTR_UPLOAD_CHECK = PROXY_CONFIG_ID
 			+ ".uploadCheck";
 	public static final String ATTR_PROGRAM_PATH = PROXY_CONFIG_ID
@@ -84,11 +83,9 @@ public class SnapGateProxyTab extends AbstractTinyOSDebuggerTab implements
 	private Text ttyDevice;
 	private Combo protocolCombo;
 	private Text gdbPort;
-	private Text serverPort;
 	private String programPathName;
 	private Button uploadCheck;
 	private Text programPath;
-	private Button programDefault;
 	
 	public enum DriverFlag {
 		USB_ACCESS, TTY_ACCESS
@@ -136,13 +133,12 @@ public class SnapGateProxyTab extends AbstractTinyOSDebuggerTab implements
 	@Override
 	public String getCommand() {
 		String command = getProgramName();
-		command = command + " -s " + usbDeviceCombo.getText()
-				+ " -p " + gdbPort.getText()
-				+ " -i " + snapgateCombo.getText()
-				+ " -P " + serverPort.getText();
+		command = command + " " + snapgateCombo.getText()
+				+ " " + usbDeviceCombo.getText()
+				+ " " + gdbPort.getText();
 		
 		if(uploadCheck.getSelection())
-			command = command + " -f " + programPath.getText();
+			command = command + " " + programPath.getText();
 		
 		return command;
 	}
@@ -195,7 +191,6 @@ public class SnapGateProxyTab extends AbstractTinyOSDebuggerTab implements
 		createSnapGateSelection(content);
 		createMSPDebugSelection(content);
 		createPortSetting(content);
-		createServerPortSetting(content);
 		createProgramPathSetting(content);
 	}
 
@@ -250,7 +245,6 @@ public class SnapGateProxyTab extends AbstractTinyOSDebuggerTab implements
 					"/dev/ttyUSB0"));
 			protocolCombo.select(configuration.getAttribute(ATTR_PROTOCOL, 1)); // JTAG
 			gdbPort.setText(configuration.getAttribute(ATTR_GDB_PORT, "7000"));
-			serverPort.setText(configuration.getAttribute(ATTR_SERVER_PORT, "32000"));
 			uploadCheck.setSelection(configuration.getAttribute(
 					ATTR_UPLOAD_CHECK, false));
 			programPath.setText(configuration.getAttribute(ATTR_PROGRAM_PATH,
@@ -283,7 +277,6 @@ public class SnapGateProxyTab extends AbstractTinyOSDebuggerTab implements
 			configuration.setAttribute(ATTR_PROTOCOL,
 					protocolCombo.getSelectionIndex());
 			configuration.setAttribute(ATTR_GDB_PORT, gdbPort.getText());
-			configuration.setAttribute(ATTR_SERVER_PORT, serverPort.getText());
 			configuration.setAttribute(ATTR_UPLOAD_CHECK, uploadCheck.getSelection());
 			configuration.setAttribute(ATTR_PROGRAM_PATH, programPath.getText());
 		}
@@ -302,7 +295,6 @@ public class SnapGateProxyTab extends AbstractTinyOSDebuggerTab implements
 		configuration.setAttribute(ATTR_TTY_STRING, "/dev/ttyUSB0");
 		configuration.setAttribute(ATTR_PROTOCOL, 1); // JTAG
 		configuration.setAttribute(ATTR_GDB_PORT, "7000");
-		configuration.setAttribute(ATTR_SERVER_PORT, "32000");
 		configuration.setAttribute(ATTR_UPLOAD_CHECK, false);
 		configuration.setAttribute(ATTR_PROGRAM_PATH, "");
 	}
@@ -343,39 +335,11 @@ public class SnapGateProxyTab extends AbstractTinyOSDebuggerTab implements
 			}
 		});
 	}
-
-	private void createServerPortSetting(Composite parent) {
-		Label serverPortLabel = new Label(parent, SWT.NONE);
-		serverPortLabel.setText("Listen for SnapGate on port"); //$NON-NLS-1$
-		serverPortLabel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER,
-				false, false));
-
-		GridData data;
-		serverPort = new Text(parent, SWT.SINGLE | SWT.BORDER);
-		serverPort.setLayoutData(data = new GridData(SWT.LEFT, SWT.CENTER, true,
-				false));
-		data.widthHint = 45;
-		serverPort.setText("32000");
-		serverPort.addModifyListener(new ModifyListener() {
-			public void modifyText(ModifyEvent evt) {
-				String error = "Invalid server port";
-				if (!portIsValid(serverPort.getText())) {
-					setErrorCondition(error);
-				} else {
-					removeErrorCondition(error);
-				}
-				if (!isInitializing()) {
-					setDirty(true);
-					updateLaunchConfigurationDialog();
-				}
-			}
-		});
-	}
 	
 	private void getUSBDevices() {
-		if(snapgateCombo.getText().isEmpty() || serverPort.getText().isEmpty())
+		if(snapgateCombo.getText().isEmpty())
 			return;
-		ProcessBuilder pb = new ProcessBuilder(getProgramName(), "-l", "-i", snapgateCombo.getText(), "-P", serverPort.getText());
+		ProcessBuilder pb = new ProcessBuilder(getProgramName(), snapgateCombo.getText(), "list");
 		Process p;
 		try {
 			p = pb.start();
