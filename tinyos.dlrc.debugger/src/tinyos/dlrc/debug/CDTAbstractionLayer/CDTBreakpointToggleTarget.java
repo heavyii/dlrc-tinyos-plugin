@@ -20,10 +20,17 @@
  */
 package tinyos.dlrc.debug.CDTAbstractionLayer;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+
 import org.eclipse.cdt.debug.core.CDIDebugModel;
 import org.eclipse.cdt.debug.core.model.ICBreakpointType;
 import org.eclipse.core.filesystem.URIUtil;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -108,7 +115,30 @@ public class CDTBreakpointToggleTarget implements IToggleBreakpointsTarget {
 	 * @see org.eclipse.debug.ui.actions.IToggleBreakpointsTarget#canToggleLineBreakpoints(org.eclipse.ui.IWorkbenchPart, org.eclipse.jface.viewers.ISelection)
 	 */
 	public boolean canToggleLineBreakpoints( IWorkbenchPart part, ISelection selection ) {
-		return ( selection instanceof ITextSelection );
+		if ( part instanceof ITextEditor ) {
+			ITextEditor textEditor = (ITextEditor)part;
+			IEditorInput input = textEditor.getEditorInput();
+			if ( input == null ) 
+				return false;
+		
+			IDocument document = textEditor.getDocumentProvider().getDocument( input );
+			if ( document == null ) 
+				return false;
+			
+			IResource resource = getResource( textEditor );
+			if ( resource == null ) 
+				return false;
+		
+			if(resource.getName().isEmpty())
+				return false;
+
+			int lineNumber = (((ITextSelection)selection).getStartLine()) + 1;
+			IProject project = resource.getProject();
+			String bkptInfoFile = getBreakpointInfoFile(project);
+			if(bkptInfoFile == null || checkBreakpointInfo(resource.getName(), lineNumber, bkptInfoFile))
+				return true;
+		}
+		return false;
 	}
 
 	/* (non-Javadoc)
@@ -169,7 +199,60 @@ public class CDTBreakpointToggleTarget implements IToggleBreakpointsTarget {
 		}
 		return root;
 	}
+	
+	private String searchFile(String rootPath, String filename){
+		File root = new File(rootPath);
+		File[] files = root.listFiles();
+		for (File file : files) {
+			if (file.isDirectory()) {
+				return searchFile(file.getAbsolutePath(), filename);
+			} else {
+				if(filename.equals(file.getName())) {
+					return file.getAbsolutePath();
+				}
+			}
+		}
+		return null;
+	}
+	
+	/* (non-Javadoc)
+	 * get absolute path of breakpoint-info.txt 
+	 * 
+	 */
+	private String getBreakpointInfoFile(IProject project) {
+		if ( project.exists() ) {
+			return searchFile(project.getLocation().toString() + "/build", "breakpoint-info.txt");
+		}
+		
+		return null;
+	}
+	
+	/* (non-Javadoc)
+	 * check if name:line is in breakpoint-info.txt
+	 */
+	private boolean checkBreakpointInfo(String name, int line, String breakpointInfoFile) {
+		boolean returnValue = false;
+		String targetString = name + ":" + line;
+		FileReader fileReader;
+		try {
+			fileReader = new FileReader(breakpointInfoFile);
+	        BufferedReader bufferedReader = new BufferedReader(fileReader);
+	        String lineStr = null;
+	        while ((lineStr = bufferedReader.readLine()) != null) {
+	            if(lineStr.indexOf(targetString) > 0) {
+	            	returnValue = true;
+	            	break;
+	            }
+	        }
+	        bufferedReader.close();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 
+		return returnValue;
+	}
 	private String getSourceHandle( IEditorInput input ) throws CoreException {
 		if ( input instanceof IFileEditorInput ) {
 			return ((IFileEditorInput)input).getFile().getLocation().toOSString();

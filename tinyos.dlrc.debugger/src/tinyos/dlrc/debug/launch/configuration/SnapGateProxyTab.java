@@ -217,7 +217,8 @@ public class SnapGateProxyTab extends AbstractTinyOSDebuggerTab implements
 		}
 		IProject project = ResourcesPlugin.getWorkspace().getRoot()
 				.getProject(projectString);
-		programString = project.getLocation().toString() + "/" + programString;
+		if(project.exists())			
+			programString = project.getLocation().toString() + "/" + programString;
 		return programString;
 	}
 	

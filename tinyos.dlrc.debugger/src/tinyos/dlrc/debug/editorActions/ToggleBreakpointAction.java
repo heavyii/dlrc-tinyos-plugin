@@ -66,8 +66,8 @@ public class ToggleBreakpointAction extends Action {
 
 	public void run() {
 		try {
-			m_target.toggleLineBreakpoints(getWorkbenchPart(),
-					getTargetSelection());
+			if(m_target.canToggleLineBreakpoints(getWorkbenchPart(), getTargetSelection()))
+				m_target.toggleLineBreakpoints(getWorkbenchPart(), getTargetSelection());
 		} catch (CoreException e) {
 			TinyOSDebugPlugin.getDefault().log("Exception while toggling breakpoint.",e);
 		}
